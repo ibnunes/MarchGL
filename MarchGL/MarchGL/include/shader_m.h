@@ -24,7 +24,7 @@ class Shader: public MarchShader {
 		try {
 			vertexCode = extractContent(vertexPath);
 
-			cout << "-- VERTEX SHADER --" << endl << vertexCode << endl;
+			cout << "-- VERTEX SHADER --" << endl;// << vertexCode << endl;
 		} catch (ifstream::failure& e) {
 			report.setReport(TYPE_READING | SHADER_VERTEX, string(e.what()));
 			return;
@@ -33,7 +33,7 @@ class Shader: public MarchShader {
 		try {
 			fragmentCode = extractContent(fragmentPath);
 
-			cout << "-- FRAGMENT SHADER --" << endl << fragmentCode << endl;
+			cout << "-- FRAGMENT SHADER --" << endl;// << fragmentCode << endl;
 		} catch (ifstream::failure& e) {
 			report.setReport(TYPE_READING | SHADER_FRAGMENT, string(e.what()));
 			return;
@@ -42,6 +42,8 @@ class Shader: public MarchShader {
 		if (tessAvailable) {
 			try {
 				tessControlCode = extractContent(tessControlPath);
+
+				cout << "-- TESSELLATION CONTROLER SHADER --" << endl;// << fragmentCode << endl;
 			} catch (ifstream::failure& e) {
 				report.setReport(TYPE_READING | SHADER_TESSELLATION_C, string(e.what()));
 				return;
@@ -49,6 +51,8 @@ class Shader: public MarchShader {
 
 			try {
 				tessEvalCode = extractContent(tessEvalPath);
+
+				cout << "-- TESSELLATION EVALUATION SHADER --" << endl;
 			} catch (ifstream::failure& e) {
 				report.setReport(TYPE_READING | SHADER_TESSELLATION_E, string(e.what()));
 				return;
@@ -63,23 +67,27 @@ class Shader: public MarchShader {
 
 		// vertex shader
 		compileShader(vertex, vShaderCode, SHADER_VERTEX);
-		if (!checkCompileErrors(vertex, SHADER_VERTEX))
+		if (!checkCompileErrors(vertex, SHADER_VERTEX)) {
 			return;
+		}
 
 		// fragment Shader
 		compileShader(fragment, fShaderCode, SHADER_FRAGMENT);
-		if (!checkCompileErrors(fragment, SHADER_FRAGMENT))
+		if (!checkCompileErrors(fragment, SHADER_FRAGMENT)) {
 			return;
+		}
 
 		// if tessellation shaders are given, compile tessellation shaders
 		if (tessAvailable) {
 			compileShader(tessellationControl, tessControlCode.c_str(), SHADER_TESSELLATION_C);
-			if (!checkCompileErrors(tessellationControl, SHADER_TESSELLATION_C))
+			if (!checkCompileErrors(tessellationControl, SHADER_TESSELLATION_C)) {
 				return;
+			}
 
-			compileShader(tessellationEval, tessEvalCode.c_str(), SHADER_TESSELLATION_C);
-			if (!checkCompileErrors(tessellationEval, SHADER_TESSELLATION_E))
+			compileShader(tessellationEval, tessEvalCode.c_str(), SHADER_TESSELLATION_E);
+			if (!checkCompileErrors(tessellationEval, SHADER_TESSELLATION_E)) {
 				return;
+			}
 		}
 
 		// shader Program
@@ -106,7 +114,7 @@ class Shader: public MarchShader {
 		}
 	}
 
-	void recompileWithFunctions(vector<string> iFunction) {
+	void recompileWithFunctions(string iFunction) {
 		// 1. retrieve the vertex/fragment source code from filePath
 		string vertexCode = vertexShader;
 		string fragmentCode = fragmentShader;
@@ -115,6 +123,10 @@ class Shader: public MarchShader {
 
 		try {
 			vertexCode = extractContent(vertexShader.c_str());
+
+			cout << "-- VERTEX SHADER --" << endl;
+			vertexCode = formatGLSL(vertexCode, iFunction);
+			cout << vertexCode << endl;
 		} catch (ifstream::failure& e) {
 			report.setReport(TYPE_READING | SHADER_VERTEX, string(e.what()));
 			return;
@@ -122,25 +134,35 @@ class Shader: public MarchShader {
 
 		try {
 			fragmentCode = extractContent(fragmentShader.c_str());
+
+			cout << "-- FRAGMENT SHADER --" << endl;
+			fragmentCode = formatGLSL(fragmentCode, iFunction);
+			cout << fragmentCode << endl;
 		} catch (ifstream::failure& e) {
 			report.setReport(TYPE_READING | SHADER_FRAGMENT, string(e.what()));
 			return;
 		}
 
-		if (tessControlShader.compare("")) {
+		if (tessAvailable) {
 			try {
 				tessControlCode = extractContent(tessControlShader.c_str());
+
+				cout << "-- TESSELLATION CONTROLER SHADER --" << endl;
+				tessControlCode = formatGLSL(tessControlCode, iFunction);
+				cout << tessControlCode << endl;
 			} catch (ifstream::failure& e) {
 				report.setReport(TYPE_READING | SHADER_TESSELLATION_C, string(e.what()));
 				return;
 			}
-		}
 
-		if (tessEvalShader.compare("")) {
 			try {
 				tessEvalCode = extractContent(tessEvalShader.c_str());
+
+				cout << "-- TESSELLATION EVALUATION SHADER --" << endl;
+				tessEvalCode = formatGLSL(tessEvalCode, iFunction);
+				cout << tessEvalCode << endl;
 			} catch (ifstream::failure& e) {
-				report.setReport(TYPE_READING | SHADER_TESSELLATION_C, string(e.what()));
+				report.setReport(TYPE_READING | SHADER_TESSELLATION_E, string(e.what()));
 				return;
 			}
 		}
@@ -148,8 +170,8 @@ class Shader: public MarchShader {
 		const char* vShaderCode = vertexCode.c_str();
 		const char* fShaderCode = fragmentCode.c_str();
 
-		cout << " __VERTEX__ \n" << vShaderCode << "\n";
-		cout << "__FRAGMENT__\n" << fShaderCode << "\n";
+		//cout << " __VERTEX__ \n" << vShaderCode << "\n";
+		//cout << "__FRAGMENT__\n" << fShaderCode << "\n";
 
 		// 2. recompile shaders
 		unsigned int vertex, fragment, tessellationControl, tessellationEval;
@@ -165,15 +187,13 @@ class Shader: public MarchShader {
 			return;
 
 		// if tessellation shader is given, compile tessellation shader
-		if (tessControlShader.compare("")) {
+		if (tessAvailable) {
 			compileShader(tessellationControl, tessControlCode.c_str(), SHADER_TESSELLATION_C);
 			if (!checkCompileErrors(tessellationControl, SHADER_TESSELLATION_C))
 				return;
-		}
 
-		if (tessEvalShader.compare("")) {
-			compileShader(tessellationEval, tessEvalCode.c_str(), SHADER_TESSELLATION_C);
-			if (!checkCompileErrors(tessellationEval, SHADER_TESSELLATION_C))
+			compileShader(tessellationEval, tessEvalCode.c_str(), SHADER_TESSELLATION_E);
+			if (!checkCompileErrors(tessellationEval, SHADER_TESSELLATION_E))
 				return;
 		}
 
@@ -194,11 +214,16 @@ class Shader: public MarchShader {
 
 		glAttachShader(ID, vertex);
 		glAttachShader(ID, fragment);
-		if (tessControlShader.compare(""))
+		if (tessAvailable) {
 			glAttachShader(ID, tessellationControl);
+			glAttachShader(ID, tessellationEval);
+		}
 
 		glLinkProgram(ID);
-		if (!checkCompileErrors(ID, SHADER_PROGRAM)) return;
+		if (!checkCompileErrors(ID, SHADER_PROGRAM))
+			return;
+
+
 		// delete the shaders as they're linked into our program now and no longer necessery
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
@@ -206,12 +231,11 @@ class Shader: public MarchShader {
 			glDeleteShader(tessellationControl);
 		if (tessEvalShader.compare(""))
 			glDeleteShader(tessellationEval);
+
 	}
 
 	// activate the shader
-	void use() {
-		glUseProgram(ID);
-	}
+	void use() { glUseProgram(ID); }
 
 	string getVertexShaderPath(void) { return vertexShader; }
 
@@ -219,7 +243,10 @@ class Shader: public MarchShader {
 
 	string gettessControlShaderPath(void) { return tessControlShader; }
 
-	bool wasSuccessful(void) { return report.success(); }
+	bool wasSuccessful(void) {
+		bool succ = report.success();
+		return succ;
+	}
 
 	string getReport(void) { return report.what(); }
 

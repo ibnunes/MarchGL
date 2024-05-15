@@ -10,7 +10,7 @@
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 const unsigned int THREAD_AMNT = thread::hardware_concurrency() / 2;
-const char* RMODE = "CPU";
+const char* RMODE = "GPU";
 
 const char* HELP =
 "MarchGL - Marching Cubes IsoSurfaces render"

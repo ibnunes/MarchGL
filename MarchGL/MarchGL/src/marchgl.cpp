@@ -7,6 +7,39 @@
 namespace fs = std::filesystem;
 #endif
 
+static void PushStyleCompact() {
+	ImGuiStyle& style = ImGui::GetStyle();
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, (float) (int) ( style.FramePadding.y * 0.60f )));
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x, (float) (int) ( style.ItemSpacing.y * 0.60f )));
+}
+
+static void PopStyleCompact() {
+	ImGui::PopStyleVar(2);
+}
+
+static void sortVPair(vector<pair<float, float>>& v) {
+	size_t i, j;
+	bool swapped;
+	for (i = 0; i < v.size() - 1; i++) {
+		swapped = false;
+		for (j = 0; j < v.size() - i - 1; j++) {
+			if (v[j].first > v[j + 1].first) {
+				auto tmp = v[j];
+				v[j].first = v[j + 1].first;
+				v[j].second = v[j + 1].second;
+
+				swap(v[j], v[j + 1]);
+				swapped = true;
+			}
+		}
+
+		// If no two elements were swapped by inner loop,
+		// then break
+		if (swapped == false)
+			break;
+	}
+}
+
 namespace callback {
 	MarchGL* instance = nullptr;
 
@@ -84,9 +117,9 @@ bool MarchGL::initializeGLFW(unsigned int width, unsigned int height, const char
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	#ifdef __APPLE__
+#ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	#endif
+#endif
 
 	window = glfwCreateWindow(width, height, title, NULL, NULL);
 	if (!window)
@@ -233,8 +266,8 @@ MarchGL::MarchGL(Arguments args) {
 
 		cout << "\tSetting Relevant Directories: " << endl;
 #ifdef __linux
-		#warning current_path() may not provide the actual app path! Consider using it in conjunction with argv[0] or similar.
-		fs::path appPath(fs::current_path());
+		#warning current_path() may not provide the actual app path!Consider using it in conjunction with argv[0] or similar.
+			fs::path appPath(fs::current_path());
 #else
 		filesystem::path appPath(filesys::getAppPath());
 #endif
@@ -433,8 +466,11 @@ void MarchGL::renderUI(void) {
 		ImGui::InputFloat("Voxel Size", &rS.cubeSize, 0.00F, 0.00F, "%.2f");
 		ImGui::SliderFloat3("Grid Size", &rS.gridSize.x, 0.f, 10.f);
 
+		ImGui::Checkbox("Wireframe Mode", &rS.useWireframe);
+
 		if (ImGui::Button("Apply"))
 			marchingCubes = new cubeMarch(rS);
+
 
 		ImGui::End();
 	}
@@ -447,10 +483,51 @@ void MarchGL::renderUI(void) {
 
 		if (ImGui::Button("Render")) {
 			marchingCubes->setIFunction(iF);
-			marchingCubes->generate();
+			marchingCubes->generate(glfwGetTime());
 		}
 
 		ImGui::End();
+	}
+
+	{
+		if (ImGui::Begin("Tesselation Shader Properties")) {
+			if (sS.levels.size() == 0)
+				sS.levels.push_back({ 0.f, 1.f });
+
+			static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+			if (ImGui::BeginTable("table_scrolly", 2, flags, ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing()))) {
+				for (size_t row = 0; row < sS.levels.size(); row++) {
+					ImGui::TableNextRow();
+					{
+						ImGui::TableNextColumn();
+						ImGui::SetNextItemWidth(-FLT_MIN);
+						string id = format("##DistanceDrag{}", ( row ));
+						ImGui::DragFloat(id.c_str(), &( sS.levels[row].first ), 1.f, 0.01f, 0.f, "Distance > %.1f");
+					}
+					{
+						ImGui::TableNextColumn();
+						ImGui::SetNextItemWidth(-FLT_MIN);
+						string id = format("##LevelDrag{}", ( row ));
+						ImGui::DragFloat(id.c_str(), &( sS.levels[row].second ), 1.f, 1.f, 0.f, "Level : %.1f");
+					}
+				}
+
+				ImGui::EndTable();
+			}
+
+			if (ImGui::Button("+")) {
+				sS.levels.push_back({ 0.f, 1.f });
+			}
+
+			ImGui::SameLine();
+
+			ImGui::BeginDisabled(sS.levels.size() <= 1 && sS.levels[0] == pair{ 0.f, 1.f });
+			if (ImGui::Button("-"))
+				sS.levels.pop_back();
+			ImGui::EndDisabled();
+
+			ImGui::End();
+		}
 	}
 
 	ImGui::Render();
@@ -468,11 +545,11 @@ void MarchGL::refresh(void) {
 
 	newFrameUI();
 
-	currentFrame = glfwGetTime();
-	deltaTime = currentFrame - lastFrame;
-	lastFrame = currentFrame;
-
-	cout << glfwGetTime() << endl;
+	{
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+	}
 
 	switch (processInput()) {
 		case action::CAMERA_RESET:
@@ -496,7 +573,7 @@ void MarchGL::refresh(void) {
 		marchingCubes->drawGrid(camera);
 
 	if (sS.meshOn)
-		marchingCubes->drawMesh(camera, vec3(0.0f), sS);
+		marchingCubes->drawMesh(camera, vec3(0.0f), sS, rS, currentFrame);
 }
 
 void MarchGL::terminate(void) {
@@ -505,5 +582,9 @@ void MarchGL::terminate(void) {
 }
 
 MarchGL::~MarchGL(void) {
+	free(marchingCubes);
+	free(cubemap);
+	free(cutscene);
+
 	terminate();
 }

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <regex>
 
+#include "escape/escape.h"
 
 #define SHADER_VERTEX         0b0000000001
 #define SHADER_FRAGMENT       0b0000000010
@@ -26,18 +27,20 @@
 #define TYPE_LINKING          0b1000000000
 
 using namespace std;
+using namespace Ansi;
 
 class ShaderReport {
 	public:
-	ShaderReport(void): error(0), message("") { }
+	static void setReport(const int err, const string msg) {
+		error = err;
+		message = msg;
+	}
 
-	ShaderReport(const int err, const string msg): error(err), message(msg) { }
+	static bool success(void) {
+		return error == 0;
+	}
 
-	void setReport(const int err, const string msg) { error = err; message = msg; }
-
-	bool success(void) { return error == 0; }
-
-	const string what() const throw ( ) {
+	static const string what() throw ( ) {
 		string log("");
 		if (error & TYPE_READING)          log += "Could not read ";
 		if (error & TYPE_COMPILATION)      log += "Compilation on ";
@@ -50,19 +53,18 @@ class ShaderReport {
 		if (error & SHADER_COMPUTE)        log += "compute shader ";
 		if (error & SHADER_PROGRAM)        log += "shader program ";
 		log += "(message: " + message + ").";
+
+		return Ansify<Code::BOLD, Code::FG_BRIGHT_RED>(log);
 		return log;
 	}
 
 	private:
-	int error;
-
-	string message;
+	inline static int error = 0;
+	inline static string message = "";
 };
 
 class MarchShader {
 	protected:
-	ShaderReport report;
-
 	bool checkCompileErrors(GLuint shader, const int type) {
 		GLint success;
 		GLchar infoLog[1024];
@@ -82,7 +84,7 @@ class MarchShader {
 			return true;
 
 		glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-		report.setReport(gl_type | type, string(infoLog));
+		ShaderReport::setReport(gl_type | type, string(infoLog));
 		return false;
 	}
 
@@ -139,11 +141,9 @@ class MarchShader {
 	public:
 	unsigned int ID;
 
-	bool wasSuccessful(void) { return report.success(); }
+	bool wasSuccessful(void) { return ShaderReport::success(); }
 
-	string getReport(void) { return report.what(); }
-
-	ShaderReport getReportHandler(void) { return report; }
+	string getReport(void) { return ShaderReport::what(); }
 
 	unsigned int getID() { return ID; }
 

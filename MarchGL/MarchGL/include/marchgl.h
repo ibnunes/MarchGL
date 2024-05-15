@@ -21,6 +21,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <memory>
 
 #include "cubemap.h"
 #include "cubeMarch.h"
@@ -97,9 +98,19 @@ class MarchGL {
 	void main(void);
 
 	private:
-
 	static constexpr vec3 SURF_DEFAULT_COLOR = vec3(50.f / 255.f, 140.f / 255.f, 235.f / 255.f);
 	static constexpr vec3 BG_DEFAULT_COLOR = vec3(0.53f, 0.81f, 0.98f);
+
+	Arguments args;
+	SHADER_SETTINGS sS;
+	RENDER_SETTINGS rS;
+	IMPLICIT_FUNCTION iF;
+	render_mode rmode;
+
+	cubeMarch* marchingCubes;
+	Cubemap* cubemap;
+	cutScene* cutscene;
+
 	bool success = false;
 
 	unsigned appFPS;
@@ -108,24 +119,10 @@ class MarchGL {
 	string shaderDir;
 	string fontDir;
 	string resDir;
-
-
-	//string slash; //???????????????????????????????????????????????????
-
 	string fontName;
 	string logoName;
 
-	render_mode rmode;
 	unsigned threadAmount;
-
-	cubeMarch* marchingCubes;
-	Cubemap* cubemap;
-	cutScene* cutscene;
-
-	Arguments args;
-	SHADER_SETTINGS sS;
-	RENDER_SETTINGS rS;
-	IMPLICIT_FUNCTION iF;
 
 	GLFWwindow* window;
 	unsigned scr_width;

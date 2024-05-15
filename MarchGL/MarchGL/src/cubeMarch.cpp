@@ -9,7 +9,8 @@
 
 cubeMarch::cubeMarch(void) {
 	cout << "\tInitializing CParse:";
-	cparse_startup();
+	if (renderSettings.renderMode == 0)
+		cparse_startup();
 	cout << "\t[OK]\n" << endl;
 
 	renderSettings.cubeSize = 0.1f;
@@ -23,14 +24,6 @@ cubeMarch::cubeMarch(void) {
 		renderSettings.gridSize.z * 2
 	);
 
-	std::cout << "LOADING CubeMarch SHADER: ... " << std::endl << std::endl;
-	shader = Shader("res/shaders/basicShader_vs.glsl", "res/shaders/basicShader_fs.glsl");
-	if (!shader.wasSuccessful()) {
-		std::cout << "Shader was not successful" << std::endl;
-		std::cout << shader.getReport() << std::endl;
-		return;
-	} else
-		std::cout << std::endl << "[DONE]" << std::endl << std::endl;
 
 	std::cout << "LOADING Grid SHADER: ... " << std::endl << std::endl;
 	basicShader = Shader("res/shaders/basicColorShader_vs.glsl", "res/shaders/basicColorShader_fs.glsl");
@@ -38,17 +31,34 @@ cubeMarch::cubeMarch(void) {
 		std::cout << "Shader was not successful" << std::endl;
 		std::cout << basicShader.getReport() << std::endl;
 		return;
-	} else
-		std::cout << std::endl << "[DONE]" << std::endl << std::endl;
+	}
+	std::cout << std::endl << "[DONE]" << std::endl << std::endl;
+
+
+	std::cout << "LOADING CubeMarch SHADER: ... " << std::endl << std::endl;
+	shader = Shader(
+		"res/shaders/mesh_vs.glsl",
+		"res/shaders/mesh_fs.glsl",
+		"res/shaders/mesh_tcs.glsl",
+		"res/shaders/mesh_tes.glsl"
+	);
+	if (!shader.wasSuccessful()) {
+		std::cout << "Shader was not successful" << std::endl;
+		std::cout << shader.getReport() << std::endl;
+		return;
+	}
+	std::cout << std::endl << "[DONE]" << std::endl << std::endl;
+
 
 	std::cout << "LOADING CubeMarch COMPUTE SHADER: ... " << std::endl << std::endl;
-	computeShader = ComputeShader("res/shaders/computeShaderOriginal.cs");
+	computeShader = ComputeShader("res/shaders/marchingcubes_cs.glsl");
 	if (!computeShader.wasSuccessful()) {
 		std::cout << "Shader was not successful" << std::endl;
 		std::cout << computeShader.getReport() << std::endl;
 		return;
-	} else
-		std::cout << std::endl << "[DONE]" << std::endl;
+	}
+	std::cout << std::endl << "[DONE]" << std::endl;
+
 
 	shader.use();
 	shader.setInt("skybox", 0);
@@ -57,21 +67,14 @@ cubeMarch::cubeMarch(void) {
 }
 
 cubeMarch::cubeMarch(RENDER_SETTINGS& rS) {
-	cparse_startup();
+	if (renderSettings.renderMode == 0)
+		cparse_startup();
+
 	size = glm::ivec3(
 		renderSettings.gridSize.x * 2,
 		renderSettings.gridSize.y * 2,
 		renderSettings.gridSize.z * 2
 	);
-
-	std::cout << "LOADING CubeMarch SHADER: ... " << std::endl << std::endl;
-	shader = Shader("res/shaders/basicShader_vs.glsl", "res/shaders/basicShader_fs.glsl");
-	if (!shader.wasSuccessful()) {
-		std::cout << "Shader was not successful" << std::endl;
-		std::cout << shader.getReport() << std::endl;
-		return;
-	} else
-		std::cout << std::endl << "[DONE]" << std::endl << std::endl;
 
 	std::cout << "LOADING Grid SHADER: ... " << std::endl << std::endl;
 	basicShader = Shader("res/shaders/basicColorShader_vs.glsl", "res/shaders/basicColorShader_fs.glsl");
@@ -79,24 +82,39 @@ cubeMarch::cubeMarch(RENDER_SETTINGS& rS) {
 		std::cout << "Shader was not successful" << std::endl;
 		std::cout << basicShader.getReport() << std::endl;
 		return;
-	} else
-		std::cout << std::endl << "[DONE]" << std::endl << std::endl;
+	}
+	std::cout << std::endl << "[DONE]" << std::endl << std::endl;
+
+
+	std::cout << "LOADING CubeMarch SHADER: ... " << std::endl << std::endl;
+	shader = Shader(
+		"res/shaders/mesh_vs.glsl",
+		"res/shaders/mesh_fs.glsl",
+		"res/shaders/mesh_tcs.glsl",
+		"res/shaders/mesh_tes.glsl"
+	);
+	bool shaderSuccess = shader.wasSuccessful();
+	if (!shaderSuccess) {
+		std::cout << "Shader was not successful" << std::endl;
+		std::cout << shader.getReport() << std::endl;
+		return;
+	}
+	std::cout << std::endl << "[DONE]" << std::endl << std::endl;
 
 
 	std::cout << "LOADING CubeMarch COMPUTE SHADER: ... " << std::endl << std::endl;
-	computeShader = ComputeShader("res/shaders/computeShaderOriginal.cs");
+	computeShader = ComputeShader("res/shaders/marchingcubes_cs.glsl");
 	if (!computeShader.wasSuccessful()) {
 		std::cout << "Shader was not successful" << std::endl;
 		std::cout << computeShader.getReport() << std::endl;
 		return;
-	} else
-		std::cout << std::endl << "[DONE]" << std::endl;
+	}
+	std::cout << std::endl << "[DONE]" << std::endl;
 
 
-
-	rS.gridSize.x = (float) ( (int) ( rS.gridSize.x ) );
-	rS.gridSize.y = (float) ( (int) ( rS.gridSize.y ) );
-	rS.gridSize.z = (float) ( (int) ( rS.gridSize.z ) );
+	rS.gridSize.x = (float) ( (size_t) ( rS.gridSize.x ) );
+	rS.gridSize.y = (float) ( (size_t) ( rS.gridSize.y ) );
+	rS.gridSize.z = (float) ( (size_t) ( rS.gridSize.z ) );
 
 	totalVertices = 0;
 	renderSettings = rS;
@@ -121,6 +139,7 @@ void cubeMarch::generateSingle(glm::vec3 currPoint) {
 			currPoint.y + renderSettings.cubeSize * tbl::vertexOffset[i][1],
 			currPoint.z + renderSettings.cubeSize * tbl::vertexOffset[i][2]
 		);
+
 		voxel[i].val = getDensity(voxel[i].p);
 		if (voxel[i].val < 0)
 			bin |= 1 << i;
@@ -178,7 +197,7 @@ void cubeMarch::generateCPU(void) {
 
 //---------------------------------------------------------GPU------------------------------------
 
-void cubeMarch::generateGPU() {
+void cubeMarch::generateGPU(double iTime) {
 
 	glm::ivec3 sizeGrid = ( renderSettings.gridSize * glm::vec3(2) ) / renderSettings.cubeSize;
 
@@ -189,6 +208,7 @@ void cubeMarch::generateGPU() {
 
 
 	computeShader.recompileWithFunctions(iFunction);
+	shader.recompileWithFunctions(iFunction);
 
 	//changeComputeShader(sizeGrid, iFunction, localSizes);
 
@@ -228,8 +248,8 @@ void cubeMarch::generateGPU() {
 
 
 	//create buffers
-	GLuint gridBuffer, edgeTableVBO, triTableVBO; //inputs
-	GLuint triangles, normals; //outputs
+	unsigned int gridBuffer, edgeTableVBO, triTableVBO; //inputs
+	unsigned int triangles, normals; //outputs
 	glGenBuffers(1, &gridBuffer);
 	glGenBuffers(1, &edgeTableVBO);
 	glGenBuffers(1, &triTableVBO);
@@ -249,7 +269,6 @@ void cubeMarch::generateGPU() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triTableVBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(tbl::triTable), tbl::triTable, GL_STATIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triTableVBO); //atrib=2
-
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangles);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(TRIANGLES) * sizeGrid.x * sizeGrid.y * sizeGrid.z, NULL, GL_STATIC_DRAW);
@@ -274,6 +293,7 @@ void cubeMarch::generateGPU() {
 	computeShader.setInt("MX", sizeGrid.x);
 	computeShader.setInt("MY", sizeGrid.y);
 	computeShader.setInt("MZ", sizeGrid.z);
+	computeShader.setFloat("iTime", iTime);
 
 	cout << "Global sizes: " << globalSizes[0] << " " << globalSizes[1] << " " << globalSizes[2] << " " << endl;
 	cout << "Local sizes: " << localSizes[0] << " " << localSizes[1] << " " << localSizes[2] << " " << endl;
@@ -303,7 +323,7 @@ void cubeMarch::generateGPU() {
 }
 
 
-void cubeMarch::generate(void) {
+void cubeMarch::generate(double iTime) {
 	if (iFunction == "")
 		return;
 
@@ -317,17 +337,16 @@ void cubeMarch::generate(void) {
 		generateCPU();
 		createMesh();
 	} else {
-		generateGPU();
+		generateGPU(iTime);
 	}
+
 	std::cout << std::endl << "[DONE]" << std::endl << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------
 
 
-void cubeMarch::setIFunction(IMPLICIT_FUNCTION& iF) {
-	iFunction = iF.function;
-}
+void cubeMarch::setIFunction(IMPLICIT_FUNCTION& iF) { iFunction = iF.function; }
 
 #pragma region Grid
 //----grid----
@@ -341,17 +360,13 @@ void cubeMarch::createGrid() {
 	cout << divided.x << " " << divided.y << " " << divided.z << endl;
 
 	for (float x = -renderSettings.gridSize.x; x < renderSettings.gridSize.x + renderSettings.cubeSize; x += renderSettings.cubeSize)
-		for (float y = -renderSettings.gridSize.y; y < renderSettings.gridSize.y + renderSettings.cubeSize; y += renderSettings.cubeSize)
-			for (float z = -renderSettings.gridSize.z; z < renderSettings.gridSize.z + renderSettings.cubeSize; z += renderSettings.cubeSize) {
-				bool testGridLine =
-					( abs(z) - renderSettings.gridSize.z == 0 && abs(y) - renderSettings.gridSize.y == 0 ) ||
-					( abs(z) - renderSettings.gridSize.z == 0 && abs(x) - renderSettings.gridSize.x == 0 ) ||
-					( abs(x) - renderSettings.gridSize.x == 0 && abs(y) - renderSettings.gridSize.y == 0 )
-					;
+		gridPoints.push_back(glm::vec3(x, 0, 0));
 
-				if (testGridLine)
-					gridPoints.push_back(glm::vec3(x, y, z));
-			}
+	for (float y = -renderSettings.gridSize.y; y < renderSettings.gridSize.y + renderSettings.cubeSize; y += renderSettings.cubeSize)
+		gridPoints.push_back(glm::vec3(0, y, 0));
+
+	for (float z = -renderSettings.gridSize.z; z < renderSettings.gridSize.z + renderSettings.cubeSize; z += renderSettings.cubeSize)
+		gridPoints.push_back(glm::vec3(0, 0, z));
 
 	unsigned VBO;
 	glGenVertexArrays(1, &gridVAO);
@@ -382,10 +397,10 @@ void cubeMarch::drawGrid(Camera camera) {
 	model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 	model = glm::translate(model, glm::vec3(0.f));
 
-	shader.use();
-	shader.setMat4("projection", projection);
-	shader.setMat4("view", view);
-	shader.setMat4("model", model);
+	basicShader.use();
+	basicShader.setMat4("projection", projection);
+	basicShader.setMat4("view", view);
+	basicShader.setMat4("model", model);
 
 	glBindVertexArray(gridVAO);
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -468,12 +483,14 @@ void cubeMarch::createMesh() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
 
+	glPatchParameteri(GL_PATCH_VERTICES, 3);
+
 	glBindVertexArray(0);
 
 	std::cout << "[DONE]" << std::endl;
 }
 
-void cubeMarch::drawMesh(Camera camera, glm::vec3 trans, SHADER_SETTINGS& settings) {
+void cubeMarch::drawMesh(Camera camera, glm::vec3 trans, SHADER_SETTINGS& settings, RENDER_SETTINGS& rSettings, double iTime) {
 	//std::cout << "Draw Mesh: ...";
 
 	glm::mat4 projection;
@@ -487,12 +504,30 @@ void cubeMarch::drawMesh(Camera camera, glm::vec3 trans, SHADER_SETTINGS& settin
 	model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 	model = glm::translate(model, trans);
 
+	size_t levelIndex = 0;
+	vector<glm::vec2> temp;
+	for (auto it = settings.levels.begin(); it != settings.levels.end(); ++it) {
+		//shader.setVec2("tessLevels[" + to_string(levelIndex) + "]", it->first, it->second);
+		temp.push_back({ it->first, it->second });
+		levelIndex++;
+	}
+
+	glGenBuffers(1, &tessLevelsVBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, tessLevelsVBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec2) * temp.size(), temp.data(), GL_STATIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, tessLevelsVBO); //atrib=0
+
 	shader.use();
+
 	shader.setMat4("projection", projection);
 	shader.setMat4("view", view);
 	shader.setMat4("model", model);
 
+	shader.setVec3("camPos", camera.Position);
+	shader.setVec3("camDir", camera.Front);
+
 	shader.setVec4("objectColor", settings.colorMesh);
+	shader.setFloat("iTime", iTime);
 
 	shader.setVec4("lamp.lightColor", settings.colorLight);
 	shader.setVec3("lamp.lightPos", ( settings.cameraLightSnap ) ? camera.Position : settings.lightPos);
@@ -503,10 +538,19 @@ void cubeMarch::drawMesh(Camera camera, glm::vec3 trans, SHADER_SETTINGS& settin
 	shader.setFloat("refractVal", settings.refractVal);
 	shader.setFloat("ratioRefractReflect", settings.ratioRefractReflect);
 
+	shader.setInt("tessLevelSize", levelIndex);
+	shader.setFloat("voxelDetail", renderSettings.cubeSize);
 
 	glBindVertexArray(meshVAO);
-	glDrawArrays(GL_TRIANGLES, 0, totalVertices);
+
+	( rSettings.useWireframe )
+		? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+		: glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	glDrawArrays(GL_PATCHES, 0, totalVertices);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	//glDrawArrays(GL_TRIANGLES, 0, 3);
 
-	//std::cout << "[DONE]" << std::endl;
+	//std::cout << "[DONE]" << "\n";
 }

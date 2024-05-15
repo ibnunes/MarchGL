@@ -13,7 +13,6 @@ class ComputeShader: public MarchShader {
 	// ------------------------------------------------------------------------
 	ComputeShader(const char* computePath, string iFunction = "") {
 		// 0. Define the path of the shader
-		report = ShaderReport();
 		shaderPath = string(computePath);
 
 		// 1. retrieve the compute source code from filePath
@@ -22,7 +21,7 @@ class ComputeShader: public MarchShader {
 		try {
 			computeCode = extractContent(shaderPath.c_str());
 		} catch (ifstream::failure& e) {
-			report.setReport(TYPE_READING | SHADER_COMPUTE, string(e.what()));
+			ShaderReport::setReport(TYPE_READING | SHADER_COMPUTE, string(e.what()));
 			return;
 		}
 
@@ -52,14 +51,14 @@ class ComputeShader: public MarchShader {
 
 	void recompileWithFunctions(string iFunction) {
 		// 0. Define the path of the shader
-		string computeCode = this->shaderPath;
+		string computeCode;
 
 		// 1. retrieve the compute source code from filePath
 
 		try {
 			computeCode = extractContent(shaderPath.c_str());
 		} catch (ifstream::failure& e) {
-			report.setReport(TYPE_READING | SHADER_COMPUTE, string(e.what()));
+			ShaderReport::setReport(TYPE_READING | SHADER_COMPUTE, string(e.what()));
 			return;
 		}
 
@@ -68,7 +67,7 @@ class ComputeShader: public MarchShader {
 
 		const char* cShaderCode = computeCode.c_str();
 
-		cout << "__COMPUTE SHADER__" << "\n" << cShaderCode << "\n";
+		cout << "-- COMPUTE SHADER --" << "\n" << cShaderCode << "\n";
 
 		// 2. Compile Shader
 		unsigned int compute;

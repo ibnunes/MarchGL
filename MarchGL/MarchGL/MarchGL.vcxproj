@@ -183,6 +183,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>/Zc:__cplusplus /std:c++20</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -190,6 +191,7 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;opengl32.lib;glew32s.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2022;$(SolutionDir)Dependencies\GLEW\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ShowProgress>LinkVerbose</ShowProgress>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)res\BrownMarchy.ico %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -253,12 +255,14 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)MarchGL/include;$(SolutionDir)MarchGL\res;$(SolutionDir)Dependencies\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;opengl32.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)res\BrownMarchy.ico %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -272,12 +276,14 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)MarchGL/include;$(SolutionDir)MarchGL\res;$(SolutionDir)Dependencies\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;opengl32.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)res\BrownMarchy.ico %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -392,20 +398,22 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\computeShader.cs" />
-    <None Include="res\shaders\computeShaderOriginal.cs" />
+    <None Include="res\shaders\marchingcubes_cs.glsl" />
     <None Include="res\shaders\cutsceneBG_fs.glsl" />
     <None Include="res\shaders\cutsceneBG_vs.glsl" />
     <None Include="res\shaders\cutscene_fs.glsl" />
     <None Include="res\shaders\cutscene_vs.glsl" />
-    <None Include="res\shaders\marchingcubes_cs.glsl" />
+    <None Include="res\shaders\mesh_tcs.glsl" />
+    <None Include="res\shaders\mesh_tes.glsl" />
     <None Include="res\shaders\shader_fs.glsl" />
     <None Include="res\shaders\shader_vs.glsl" />
     <None Include="res\shaders\basicColorShader_fs.glsl" />
     <None Include="res\shaders\basicColorShader_vs.glsl" />
-    <None Include="res\shaders\basicShader_fs.glsl" />
-    <None Include="res\shaders\basicShader_vs.glsl" />
+    <None Include="res\shaders\mesh_fs.glsl" />
+    <None Include="res\shaders\mesh_vs.glsl" />
     <None Include="res\shaders\skybox_fs.glsl" />
     <None Include="res\shaders\skybox_vs.glsl" />
+    <None Include="res\shaders\utility.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\camera.h" />
@@ -423,9 +431,11 @@
     <ClInclude Include="include\cubemap.h" />
     <ClInclude Include="include\cubeMarch.h" />
     <ClInclude Include="include\cutScene.h" />
+    <ClInclude Include="include\escape\escape.h" />
     <ClInclude Include="include\filesys.hpp" />
     <ClInclude Include="include\glad\glad.h" />
     <ClInclude Include="include\glm\glm.hpp" />
+    <ClInclude Include="include\KHR\khrplatform.h" />
     <ClInclude Include="include\marchShader.h" />
     <ClInclude Include="include\ImGUI\imconfig.h" />
     <ClInclude Include="include\ImGUI\imgui.h" />

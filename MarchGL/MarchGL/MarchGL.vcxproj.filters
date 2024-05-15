@@ -80,29 +80,57 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\shader_vs.glsl" />
-    <None Include="res\shaders\shader_fs.glsl" />
-    <None Include="res\shaders\basicShader_fs.glsl">
+    <None Include="res\shaders\mesh_fs.glsl">
       <Filter>shaders</Filter>
     </None>
-    <None Include="res\shaders\basicShader_vs.glsl">
+    <None Include="res\shaders\mesh_vs.glsl">
       <Filter>shaders</Filter>
     </None>
-    <None Include="res\shaders\basicColorShader_fs.glsl" />
-    <None Include="res\shaders\basicColorShader_vs.glsl" />
-    <None Include="res\shaders\marchingcubes_cs.glsl" />
-    <None Include="res\shaders\computeShaderOriginal.cs">
+    <None Include="res\shaders\marchingcubes_cs.glsl">
       <Filter>shaders</Filter>
     </None>
     <None Include="res\shaders\computeShader.cs">
       <Filter>shaders</Filter>
     </None>
-    <None Include="res\shaders\skybox_fs.glsl" />
-    <None Include="res\shaders\skybox_vs.glsl" />
-    <None Include="res\shaders\cutscene_fs.glsl" />
-    <None Include="res\shaders\cutscene_vs.glsl" />
-    <None Include="res\shaders\cutsceneBG_vs.glsl" />
-    <None Include="res\shaders\cutsceneBG_fs.glsl" />
+    <None Include="res\shaders\basicColorShader_fs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\basicColorShader_vs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\cutscene_fs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\cutscene_vs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\cutsceneBG_fs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\cutsceneBG_vs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\mesh_tcs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\mesh_tes.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\shader_fs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\shader_vs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\skybox_fs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\skybox_vs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="res\shaders\utility.glsl">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\filesys.hpp">
@@ -220,6 +248,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\cutScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\KHR\khrplatform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\escape\escape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

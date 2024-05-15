@@ -1,6 +1,8 @@
 #ifndef CUBEMARCH_H
 #define CUBEMARCH_H
 
+#include <map>
+
 #include <computeshader.h>
 #include <shader_m.h>
 #include <camera.h>
@@ -28,13 +30,18 @@ typedef struct {
 	bool isRefract;
 	bool isReflect;
 	float ratioRefractReflect;
+
+	vector<pair<float, float>> levels;
 } SHADER_SETTINGS;
+
 
 typedef struct {
 	int renderMode;
 	int threadAmount;
 	float cubeSize;
 	glm::vec3 gridSize;
+
+	bool useWireframe;
 } RENDER_SETTINGS;
 
 typedef struct {
@@ -52,7 +59,7 @@ class cubeMarch {
 	Shader shader;									// Mesh shader
 	std::vector<glm::vec3> meshTriangles, normals;	// vertices for the triangles (mesh)
 	std::vector<glm::vec3> gridPoints;
-	unsigned VAO, meshVAO, gridVAO, gridLinesVAO;
+	unsigned VAO, meshVAO, gridVAO, gridLinesVAO, tessLevelsVBO;
 	RENDER_SETTINGS renderSettings;
 	string iFunction;
 	glm::ivec3 size;
@@ -77,14 +84,14 @@ class cubeMarch {
 	glm::vec3 getIntersVertice(glm::vec3 p1, glm::vec3 p2, float D1, float D2);
 	void generateSingle(glm::vec3 currPoint);
 	void generateCPU(void);
-	void generateGPU(void);
-	void generate(void);
+	void generateGPU(double iTime);
+	void generate(double iTime);
 
 	glm::vec3 getNormal(glm::vec3 p);
 
 	//---- Mesh ----
 	void createMesh(void);
-	void drawMesh(Camera camera, glm::vec3 trans, SHADER_SETTINGS& settings);
+	void drawMesh(Camera camera, glm::vec3 trans, SHADER_SETTINGS& settings, RENDER_SETTINGS& rSettings, double iTime);
 
 	//---- Grid ----
 	void createGrid();
