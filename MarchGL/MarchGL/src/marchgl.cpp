@@ -7,6 +7,14 @@
 namespace fs = std::filesystem;
 #endif
 
+extern "C" {
+	// AMD GPU code should take this code path
+	__declspec( dllexport ) int AmdPowerXpressRequestHighPerformance = 1;
+	// Nvidia takes this code path
+	__declspec( dllexport ) unsigned long NvOptimusEnablement = 0x00000001;
+}
+
+
 static void PushStyleCompact() {
 	ImGuiStyle& style = ImGui::GetStyle();
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, (float) (int) ( style.FramePadding.y * 0.60f )));
