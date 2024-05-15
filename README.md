@@ -47,14 +47,12 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-
-![MarchGL Screen Shot](https://media.discordapp.net/attachments/1047650683559624735/1070090174568083557/image.png)
+![Torus](https://github.com/AshKetshup/MarchGL/assets/58540390/f8b4eb1e-fdff-413a-b963-715f55d25e86)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-### Built With
-
+## Built using:
 * [C++ 20](https://cplusplus.com/)
 * [GLFW 3.3.8](https://www.glfw.org/)
 * [GLAD](https://glad.dav1d.de/)
@@ -65,13 +63,19 @@
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-## Change log
+## Features:
 
-- GPU (Compute Shaders) now available 
+- GPU (Compute Shaders) and CPU mode;
+- Wireframe viewmode;
+- Reflection effect;
+- Refraction effect;
+- Tesselation Control & Evaluation Shaders;
+- Perlin Noise implemented `noise(vec3 p)`;
+- Time as a variable `iTime`;
+- All Marching Cubes algorithm is inside "src/cubeMarch.cpp";
+- Compute shader is inside "res/shaders/computeShaderOriginal.cs";
 - Limitations:
   - When voxel size < 0.1 it may not work (memory allocation problems)
-- All Marching Cubes algorithm is inside "MarchGL/MarchGL/src/cubeMarch.cpp"
-- Compute shader is inside "MarchGL/MarchGL/res/src" (file name: "computeShaderOriginal.cs")
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -80,15 +84,17 @@
 2. Introduce implicit formula in the "Implicit Functions" window, and then render 
    - f.e Sphere formula: x\*x + y\*y + z\*z - radius\*radius (replace radius for desired value)
 
-## MarchGL - Algorithm
+![Sphere](https://github.com/AshKetshup/MarchGL/assets/58540390/1093e5d3-548a-4175-860a-e57e4eb0d764)
+![Torus with Tesselation on Wireframe view](https://github.com/AshKetshup/MarchGL/assets/58540390/07e8fb44-4eff-45a5-945d-e65bf30ee4ee)
+
+
+## Marching Cubes - Algorithm
 
 Iso-Surfaces using Marching Cubes in Modern OpenGL
 
 - All 15 unique possible cases:
 
 ![cubes1](images/Pasted%20image%2020230120181503.png)
-
-
 ![cubes2](images/Pasted%20image%2020230122033900.png)
 
 - Black: vertices numbers
@@ -107,11 +113,6 @@ Iso-Surfaces using Marching Cubes in Modern OpenGL
 	     - Formula: (1-t) * p1 + t * p2, t = -D1/(D2-D1); D -> density on the point
 	  2. Add those vertices to a list
 	  3. "Organize" the vertices, in a way that the correct triangles are drawn (lookup third table, using the vertice binary)
-
-
-![Sphere Without Smooth Normals 1](images/Screenshot1.png)
-
-![Torus Without Smooth Normals 2](images/Screenshot2.png)
 
 
 
